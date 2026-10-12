@@ -337,12 +337,16 @@ static unsigned int get_bits_wordwise(seq_string_t *s, int num_bits) {
 	int_ptr = (uint32 *)s->byte_ptr;
 	raw = _byteswap_ulong(*int_ptr) << s->bit_index;
 #else
+	/* Assemble the big-endian word, then discard the bits already consumed
+	 * from the first byte -- the Windows branch above does this with
+	 * "<< s->bit_index"; the portable branch previously forgot it, so any
+	 * read starting mid-byte returned the wrong bits. */
 	raw = (
-		(s->byte_ptr[0] << 24) |
-		(s->byte_ptr[1] << 16) |
-		(s->byte_ptr[2] <<  8) |
-		(s->byte_ptr[3]      )
-	);
+		((uint32)s->byte_ptr[0] << 24) |
+		((uint32)s->byte_ptr[1] << 16) |
+		((uint32)s->byte_ptr[2] <<  8) |
+		((uint32)s->byte_ptr[3]      )
+	) << s->bit_index;
 #endif
 	raw >>= 1;
 	raw >>= 31 - num_bits;

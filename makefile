@@ -19,7 +19,7 @@ common=$(SSEOPT) -I +unix -I +str -I +threads unix.cmxa threads.cmxa str.cmxa $(
 ocaml=ocamlopt.opt $(common)
 
 
-all: depend mp3packer
+all: mp3packer
 
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx $O
@@ -45,27 +45,31 @@ ALLREQS=ptr.cmx ptr-c$O crc.cmx list2.cmx expandarray.cmx c_part$O unicode.cmx u
 
 MP3PACKER=$(ALLREQS) mp3packer.cmx
 
-mp3packer: depend $(MP3PACKER)
+mp3packer: $(MP3PACKER)
 	$(ocaml) -o $@$(EXE) $(MP3PACKER)
 
 
 MP3READER=$(ALLREQS) mp3reader.cmx
 
-mp3reader: depend $(MP3READER)
+mp3reader: $(MP3READER)
 	$(ocaml) -o $@$(EXE) $(MP3READER)
 
 
 
-test: depend $(ALLREQS) test.cmx
+test: $(ALLREQS) test.cmx
 	$(ocaml) -o $@$(EXE) $(ALLREQS) test.cmx
 	./test$(EXE)
 
 
 
 clean:
-	rm -f ./*$O ./*.cmi ./*.cmx ./*.cmo ./*.cma ./*.cmxa ./*.asm ./*.s ./*.i
+	rm -f ./*$O ./*.cmi ./*.cmx ./*.cmo ./*.cma ./*.cmxa ./*.asm ./*.s ./*.i .depend
 
-depend:
+# .depend is regenerated whenever a source file changes; GNU make re-reads
+# included makefiles after remaking them, so a fresh clone builds in one pass.
+.depend: $(wildcard *.ml *.mli)
 	ocamldep *.mli *.ml > .depend
+
+depend: .depend
 
 -include .depend

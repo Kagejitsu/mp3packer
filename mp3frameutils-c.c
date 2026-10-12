@@ -565,8 +565,9 @@ CAMLprim value mfu_find_best_config_base(
 // This function depends on 16-bit unsigned numbers and saturated arithmetic everywhere!
 
 
-// Only use for Windows -- I don't really want to debug this too much
-#if defined(WIN32) || defined(__CYGWIN__)
+// SSE4.1 search: Windows/Cygwin, or any GCC/Clang x86 build (the intrinsics
+// are the standard <smmintrin.h> ones; nothing here is compiler specific).
+#if defined(WIN32) || defined(__CYGWIN__) || (defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)))
 
 #include <emmintrin.h>
 #include <smmintrin.h>

@@ -20,6 +20,9 @@
 #include <intrin.h>
 #endif
 #include <pthread.h>
+#if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+#include <cpuid.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -156,6 +159,18 @@ CAMLprim value get_capabilities() {
 	Store_field(out_val, 2, Val_bool(info[2] & (1 <<  0)));
 	Store_field(out_val, 3, Val_bool(info[2] & (1 <<  9)));
 	Store_field(out_val, 4, Val_bool(info[2] & (1 << 19)));
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+	// GCC/Clang on x86: same CPUID leaf-1 bits as the Windows branch above
+	unsigned int eax = 0, ebx = 0, ecx = 0, edx = 0;
+	if(!__get_cpuid(1, &eax, &ebx, &ecx, &edx)) {
+		ecx = 0;
+		edx = 0;
+	}
+	Store_field(out_val, 0, Val_bool(edx & (1u << 25))); // SSE
+	Store_field(out_val, 1, Val_bool(edx & (1u << 26))); // SSE2
+	Store_field(out_val, 2, Val_bool(ecx & (1u <<  0))); // SSE3
+	Store_field(out_val, 3, Val_bool(ecx & (1u <<  9))); // SSSE3
+	Store_field(out_val, 4, Val_bool(ecx & (1u << 19))); // SSE4.1
 #else
 	// Don't use SSE stuff - other OSes may be on any random architecture
 	Store_field(out_val, 0, Val_bool(0));

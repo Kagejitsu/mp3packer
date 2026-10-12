@@ -170,7 +170,7 @@ class virtual virt_mp3read_2 =
 		method virtual seek : int -> unit
 		method virtual pos : int
 		method virtual length : int
-		method virtual read : string -> int -> int -> unit
+		method virtual read : bytes -> int -> int -> unit
 		method virtual read_ptrref : int -> Ptr.Ref.ref_t
 		method virtual close : unit
 
@@ -811,7 +811,7 @@ class virtual virt_mp3read (*?(debug=false)*)(* in_file*) =
 		method virtual seek : int -> unit
 		method virtual pos : int
 		method virtual length : int
-		method virtual read : string -> int -> int -> unit
+		method virtual read : bytes -> int -> int -> unit
 		method virtual read_ptrref : int -> Ptr.Ref.ref_t
 		method virtual close : unit
 
@@ -1463,9 +1463,9 @@ class mp3read_unix print_fun in_file =
 			)
 		)
 		method read_ptrref l = (
-			let s = String.create l in
+			let s = Bytes.create l in
 			o#read s 0 l;
-			Ptr.Ref.of_string s
+			Ptr.Ref.of_string (Bytes.unsafe_to_string s)
 		)
 		method close = Unix.close handle
 	end
@@ -1497,9 +1497,9 @@ class mp3read_unix_64 print_fun in_file =
 			)
 		)
 		method read_ptrref l = (
-			let s = String.create l in
+			let s = Bytes.create l in
 			o#read s 0 l;
-			Ptr.Ref.of_string s
+			Ptr.Ref.of_string (Bytes.unsafe_to_string s)
 		)
 		method close = Unix.close handle
 	end

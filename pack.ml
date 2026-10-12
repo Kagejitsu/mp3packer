@@ -17,73 +17,73 @@
 *******************************************************************************)
 
 let to_hex s =
-  let result = String.create (2 * String.length s) in
+  let result = Bytes.create (2 * String.length s) in
   for i = 0 to String.length s - 1 do
-    String.blit (Printf.sprintf "%02X" (int_of_char s.[i])) 0 result (2*i) 2;
+    Bytes.blit_string (Printf.sprintf "%02X" (int_of_char s.[i])) 0 result (2*i) 2;
   done;
-  result;;
+  Bytes.unsafe_to_string result;;
 
 (******************************************************************************)
 (****************************** PACK AND UNPACK *******************************)
 (******************************************************************************)
 (* pack *)
 let packc inNum =
-	let returnThis = "0" in
+	let returnThis = Bytes.create 1 in
 	if inNum < 0 then (
-		returnThis.[0] <- Char.chr ((inNum + 256) land 0xFF)
+		Bytes.set returnThis 0 (Char.chr ((inNum + 256) land 0xFF));
 	) else (
-		returnThis.[0] <- Char.chr (inNum land 0xFF)
+		Bytes.set returnThis 0 (Char.chr (inNum land 0xFF));
 	);
-	returnThis;;
+	Bytes.unsafe_to_string returnThis;;
 
 let packC inNum =
-	let returnThis = "0" in
-	returnThis.[0] <- Char.chr (inNum land 0xFF);
-	returnThis;;
+	let returnThis = Bytes.create 1 in
+	Bytes.set returnThis 0 (Char.chr (inNum land 0xFF));
+	Bytes.unsafe_to_string returnThis;;
 
 let packn inNum =
-	let returnThis = "01" in
-	returnThis.[0] <- Char.chr ((inNum land 0xFF00) lsr 8);
-	returnThis.[1] <- Char.chr (inNum land 0x00FF);
-	returnThis;;
+	let returnThis = Bytes.create 2 in
+	Bytes.set returnThis 0 (Char.chr ((inNum land 0xFF00) lsr 8));
+	Bytes.set returnThis 1 (Char.chr (inNum land 0x00FF));
+	Bytes.unsafe_to_string returnThis;;
 
 let packN inNum =
-	let returnThis = "0123" in
-	returnThis.[0] <- Char.chr ((inNum land 0x7F000000) lsr 24);
-	returnThis.[1] <- Char.chr ((inNum land 0x00FF0000) lsr 16);
-	returnThis.[2] <- Char.chr ((inNum land 0x0000FF00) lsr 8);
-	returnThis.[3] <- Char.chr (inNum land 0x000000FF);
-	returnThis;;
+	let returnThis = Bytes.create 4 in
+	Bytes.set returnThis 0 (Char.chr ((inNum land 0x7F000000) lsr 24));
+	Bytes.set returnThis 1 (Char.chr ((inNum land 0x00FF0000) lsr 16));
+	Bytes.set returnThis 2 (Char.chr ((inNum land 0x0000FF00) lsr 8));
+	Bytes.set returnThis 3 (Char.chr (inNum land 0x000000FF));
+	Bytes.unsafe_to_string returnThis;;
 
 let packN32 inNum =
-	let returnThis = "0123" in
-	returnThis.[0] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0xFF000000l) 24));
-	returnThis.[1] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x00FF0000l) 16));
-	returnThis.[2] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x0000FF00l) 8));
-	returnThis.[3] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x000000FFl) 0));
-	returnThis;;
+	let returnThis = Bytes.create 4 in
+	Bytes.set returnThis 0 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0xFF000000l) 24)));
+	Bytes.set returnThis 1 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x00FF0000l) 16)));
+	Bytes.set returnThis 2 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x0000FF00l) 8)));
+	Bytes.set returnThis 3 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x000000FFl) 0)));
+	Bytes.unsafe_to_string returnThis;;
 
 let packv inNum =
-	let returnThis = "01" in
-	returnThis.[1] <- Char.chr ((inNum land 0xFF00) lsr 8);
-	returnThis.[0] <- Char.chr (inNum land 0x00FF);
-	returnThis;;
+	let returnThis = Bytes.create 2 in
+	Bytes.set returnThis 1 (Char.chr ((inNum land 0xFF00) lsr 8));
+	Bytes.set returnThis 0 (Char.chr (inNum land 0x00FF));
+	Bytes.unsafe_to_string returnThis;;
 
 let packV inNum =
-	let returnThis = "0123" in
-	returnThis.[3] <- Char.chr ((inNum land 0x7F000000) lsr 24);
-	returnThis.[2] <- Char.chr ((inNum land 0x00FF0000) lsr 16);
-	returnThis.[1] <- Char.chr ((inNum land 0x0000FF00) lsr 8);
-	returnThis.[0] <- Char.chr (inNum land 0x000000FF);
-	returnThis;;
+	let returnThis = Bytes.create 4 in
+	Bytes.set returnThis 3 (Char.chr ((inNum land 0x7F000000) lsr 24));
+	Bytes.set returnThis 2 (Char.chr ((inNum land 0x00FF0000) lsr 16));
+	Bytes.set returnThis 1 (Char.chr ((inNum land 0x0000FF00) lsr 8));
+	Bytes.set returnThis 0 (Char.chr (inNum land 0x000000FF));
+	Bytes.unsafe_to_string returnThis;;
 
 let packV32 inNum =
-	let returnThis = "0123" in
-	returnThis.[3] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0xFF000000l) 24));
-	returnThis.[2] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x00FF0000l) 16));
-	returnThis.[1] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x0000FF00l) 8));
-	returnThis.[0] <- Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x000000FFl) 0));
-	returnThis;;
+	let returnThis = Bytes.create 4 in
+	Bytes.set returnThis 3 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0xFF000000l) 24)));
+	Bytes.set returnThis 2 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x00FF0000l) 16)));
+	Bytes.set returnThis 1 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x0000FF00l) 8)));
+	Bytes.set returnThis 0 (Char.chr (Int32.to_int (Int32.shift_right_logical (Int32.logand inNum 0x000000FFl) 0)));
+	Bytes.unsafe_to_string returnThis;;
 
 
 (* unpack *)
@@ -201,13 +201,13 @@ let packBits str offset num store =
 		let outMask = 1 lsl (7 - bit) in
 (*		Printf.printf " (%d,%d) = %9d %d (%d) %d!\n" byte bit mask (if store land mask = 0 then 0 else 1) outMask ((if store land mask = 0 then 0 else 255) land outMask);*)
 
-		let orig = (Char.code str.[byte]) in
+		let orig = (Char.code (Bytes.get str byte)) in
 		let cleared = orig land (255 lxor outMask) in
 		let set = ((if store land mask = 0 then 0 else 255) land outMask) in
 		let gnu = cleared lor set in
 (*		Printf.printf " %02X %02X %02X %02X\n" orig cleared set gnu;*)
 
-		str.[byte] <- Char.chr gnu;
+		Bytes.set str byte (Char.chr gnu);
 
 (*		str.[byte] <- Char.chr ((Char.code str.[byte]) land ((if store land mask = 0 then 0 else 255) land outMask));*)
 (*		Printf.printf "  %S\n" (to_hex str);*)

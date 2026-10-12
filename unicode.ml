@@ -1,6 +1,6 @@
 type 'a t = Normal of 'a | Error of int;;
 
-external is_win : unit -> bool = "uni_is_win" "noalloc";;
+external is_win : unit -> bool = "uni_is_win" [@@noalloc];;
 let win = is_win ();;
 
 

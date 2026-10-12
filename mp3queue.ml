@@ -137,7 +137,7 @@ let bit_blit =
 		)
 	) in
 	fun s1 o1 s2 o2 l -> (
-		if l < 0 || o1 < 0 || o2 < 0 || o1 + l > String.length s1 lsl 3 || o2 + l > String.length s2 lsl 3 then (
+		if l < 0 || o1 < 0 || o2 < 0 || o1 + l > String.length s1 lsl 3 || o2 + l > Bytes.length s2 lsl 3 then (
 			invalid_arg "bit_blit"
 		) else (
 			b s1 o1 s2 o2 l
@@ -204,12 +204,12 @@ let side_info_find_ok :
 				Ptr.Ref.sub reservoir (output_offset_bits asr 3) output_length_bytes
 			) else (
 				(* UH-OH! Need to do a bit-blit *)
-				let out = String.create output_length_bytes in
-				out.[output_length_bytes - 1] <- '\x00';
+				let out = Bytes.create output_length_bytes in
+				Bytes.set out (output_length_bytes - 1) '\x00';
 				let reservoir_string = Ptr.Ref.to_string reservoir in
 				bit_blit reservoir_string output_offset_bits out 0 (first_granule_bits + second_granule_bits);
 
-				Ptr.Ref.of_string out
+				Ptr.Ref.of_string (Bytes.unsafe_to_string out)
 			)
 		) in
 		(output_side, output_data, first_granule_ok && second_granule_ok)
@@ -267,13 +267,13 @@ let side_info_find_ok :
 				Ptr.Ref.sub reservoir (output_offset_bits asr 3) output_length_bytes
 			) else (
 				(* bit-blit! *)
-				let out = String.create output_length_bytes in
+				let out = Bytes.create output_length_bytes in
 				(* Zero the last byte so that no random memory junk gets in after the data bits *)
-				out.[output_length_bytes - 1] <- '\x00';
+				Bytes.set out (output_length_bytes - 1) '\x00';
 				let reservoir_string = Ptr.Ref.to_string reservoir in
 				bit_blit reservoir_string output_offset_bits out 0 (new_a + new_b + new_c + new_d);
 
-				Ptr.Ref.of_string out
+				Ptr.Ref.of_string (Bytes.unsafe_to_string out)
 			)
 		) in
 		(output_side, output_data, first_granule_ok && second_granule_ok)
@@ -311,12 +311,12 @@ let side_info_find_ok :
 			) else if output_offset_bits land 7 = 0 then (
 				Ptr.Ref.sub reservoir (output_offset_bits asr 3) output_length_bytes
 			) else (
-				let out = String.create output_length_bytes in
-				out.[output_length_bytes - 1] <- '\x00';
+				let out = Bytes.create output_length_bytes in
+				Bytes.set out (output_length_bytes - 1) '\x00';
 				let reservoir_string = Ptr.Ref.to_string reservoir in
 				bit_blit reservoir_string output_offset_bits out 0 granule_bits;
 
-				Ptr.Ref.of_string out
+				Ptr.Ref.of_string (Bytes.unsafe_to_string out)
 			)
 		) in
 		(output_side, output_data, granule_ok)
@@ -358,12 +358,12 @@ let side_info_find_ok :
 			) else if output_offset_bits land 7 = 0 then (
 				Ptr.Ref.sub reservoir (output_offset_bits asr 3) output_length_bytes
 			) else (
-				let out = String.create output_length_bytes in
-				out.[output_length_bytes - 1] <- '\x00';
+				let out = Bytes.create output_length_bytes in
+				Bytes.set out (output_length_bytes - 1) '\x00';
 				let reservoir_string = Ptr.Ref.to_string reservoir in
 				bit_blit reservoir_string output_offset_bits out 0 (new_a + new_b);
 
-				Ptr.Ref.of_string out
+				Ptr.Ref.of_string (Bytes.unsafe_to_string out)
 			)
 		) in
 		(output_side, output_data, granule_ok)
@@ -534,7 +534,7 @@ let do_queue recompress_obj state file_state (in_obj : Mp3read.mp3read_ptr_2) ou
 
 	(* Returns a valid header given the bitrate info, common settings, and stereo mode *)
 	let (bitrate_to_header_string, bitrate_to_header) = (
-		let template = "\xFF\xFF\xFF\xFF" in
+		let template = Bytes.of_string "\xFF\xFF\xFF\xFF" in
 		let pack_head = packBits template in
 
 		pack_head 0 11 0b11111111111;
@@ -563,17 +563,17 @@ let do_queue recompress_obj state file_state (in_obj : Mp3read.mp3read_ptr_2) ou
 
 		(
 			(fun br ms is -> (
-				let out_head = String.copy template in
+				let out_head = Bytes.copy template in
 				let pack_head = packBits out_head in
 				pack_head 16 4 br.bitrate_index; (* Bitrate *)
 				pack_head 22 1 (if br.bitrate_padding then 1 else 0);
 				pack_head 26 1 (if ms then 1 else 0);
 				pack_head 27 1 (if is then 1 else 0);
-				out_head
+				Bytes.unsafe_to_string out_head
 			))
 		,
 			(fun br ms is -> (
-				let out_head = Ptr.of_string template in
+				let out_head = Ptr.of_string (Bytes.to_string template) in
 				let p = Ptr.put_bits out_head in
 				p 16 4 br.bitrate_index;
 				p 22 1 (if br.bitrate_padding then 1 else 0);

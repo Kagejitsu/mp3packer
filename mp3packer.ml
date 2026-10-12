@@ -98,18 +98,18 @@ let debug_parse = function
 	| _ ->      (debug_in_ref := false; debug_out_ref := false; debug_recompress_ref := false)
 ;;
 
-let keep_ok_parse v = match String.lowercase v with
+let keep_ok_parse v = match String.lowercase_ascii v with
 (*	| "input" | "in" -> keep_ok_ref := Keep_ok_input*)
 	| "output" | "out" -> keep_ok_ref := Keep_ok_output
 	| _ -> keep_ok_ref := Keep_ok_both
 ;;
-let keep_notok_parse v = match String.lowercase v with
+let keep_notok_parse v = match String.lowercase_ascii v with
 	| "input" | "in" -> keep_notok_ref := Keep_notok_input
 	| "output" | "out" -> keep_notok_ref := Keep_notok_output
 	| _ -> keep_notok_ref := Keep_notok_both
 ;;
 
-let process_parse v = match String.lowercase v with
+let process_parse v = match String.lowercase_ascii v with
 	| "sse41" when sse41_ok -> process_set_ref := SSE41
 	| "sse41" -> Printf.printf "WARNING: SSE4.1 unsupported\n"
 	| "base" -> process_set_ref := Set_base

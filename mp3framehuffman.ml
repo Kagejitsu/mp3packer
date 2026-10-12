@@ -22,7 +22,7 @@ open Types;;
 open Pack;;
 
 (* get_huffman ht_num int_for_processing start_left_shift *)
-external get_huffman_c : int -> int -> int -> int = "mfh_get_huffman" "noalloc";;
+external get_huffman_c : int -> int -> int -> int = "mfh_get_huffman" [@@noalloc];;
 let get_huffman_big num i shift = get_huffman_c num i shift;;
 let get_huffman_part1 num i shift = get_huffman_c (num + 32) i shift;;
 

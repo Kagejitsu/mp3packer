@@ -14,7 +14,7 @@ endif
 
 
 #common=-w "+a-4-9-32-35" -warn-error "+a-4-6-7-9-27-29-32..39" -warn-error "+a-4-9-32-35" $(SSEOPT) -thread unix.cmxa threads.cmxa str.cmxa $(EXLIBRARIES)
-common=$(SSEOPT) -thread unix.cmxa threads.cmxa str.cmxa $(EXLIBRARIES)
+common=$(SSEOPT) -I +unix -I +str -I +threads unix.cmxa threads.cmxa str.cmxa $(EXLIBRARIES)
 
 ocaml=ocamlopt.opt $(common)
 

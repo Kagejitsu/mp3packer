@@ -50,7 +50,7 @@ class mp3write_unix ?(flags=[Unix.O_EXCL]) out_file =
 		val handle = Unicode.openfile_utf8 out_file (Unix.O_WRONLY :: Unix.O_CREAT :: flags) 0o660
 		method output s r l = (
 			if l = 0 then () else (
-				let wrote = Unix.write handle s r l in
+				let wrote = Unix.write_substring handle s r l in
 				o#output s (r + wrote) (l - wrote)
 			)
 		)

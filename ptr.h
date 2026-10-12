@@ -37,6 +37,21 @@ typedef unsigned __int16 uint16_t;
 #define TRUE 1
 #endif
 
+/* OCaml 5 compatibility: the runtime no longer provides the old unprefixed
+ * fixed-width typedefs from caml/config.h, nor the unprefixed runtime calls
+ * that caml/compatibility.h used to supply. Map them to the modern names. */
+#ifndef int32
+typedef int32_t  int32;
+typedef uint32_t uint32;
+typedef int64_t  int64;
+typedef uint64_t uint64;
+#endif
+#ifndef enter_blocking_section
+#define enter_blocking_section caml_enter_blocking_section
+#define leave_blocking_section caml_leave_blocking_section
+#define raise_out_of_memory    caml_raise_out_of_memory
+#endif
+
 enum ptr_type {
 	PTR_MALLOC,
 	PTR_MMAP,
